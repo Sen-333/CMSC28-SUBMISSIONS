@@ -1,0 +1,177 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+struct Node {
+    int data;
+    struct Node* next;
+};
+
+void addItem(struct Node** head_ref) {
+    struct Node* new_node = (struct Node*)malloc(sizeof(struct Node));
+    if (new_node == NULL) {
+        printf("Memory allocation failed!\n");
+        return;
+    }
+
+    printf("Please enter the item to be added: ");
+    scanf("%d", &new_node->data);
+
+    printf("Where to add the item?\n");
+    printf("[1] Start of the list\n");
+    printf("[2] End of the list\n");
+    printf("[3] Specific position\n");
+    printf("[0] Cancel\n");
+    printf("Enter choice: ");
+
+    int choice;
+    scanf("%d", &choice);
+
+    switch (choice) {
+        case 1:
+            new_node->next = *head_ref;
+            *head_ref = new_node;
+            break;
+        case 2:
+            new_node->next = NULL;
+            if (*head_ref == NULL) {
+                *head_ref = new_node;
+            } else {
+                struct Node* last = *head_ref;
+                while (last->next != NULL) {
+                    last = last->next;
+                }
+                last->next = new_node;
+            }
+            break;
+        case 3: {
+            int position;
+            printf("Enter the position to add the item: ");
+            scanf("%d", &position);
+            if (position <= 0) {
+                printf("Invalid position!\n");
+                free(new_node);
+                return;
+            }
+            if (position == 1) {
+                new_node->next = *head_ref;
+                *head_ref = new_node;
+                return;
+            }
+            struct Node* current = *head_ref;
+            int count = 1;
+            while (count < position - 1 && current != NULL) {
+                current = current->next;
+                count++;
+            }
+            if (current == NULL) {
+                printf("Invalid position!\n");
+                free(new_node);
+                return;
+            }
+            new_node->next = current->next;
+            current->next = new_node;
+            break;
+        }
+        default:
+            printf("Operation cancelled\n");
+            free(new_node);
+    }
+}
+
+void deleteItem(struct Node** head_ref) {
+    if (*head_ref == NULL) {
+        printf("The list contains no such element\n");
+        return;
+    }
+
+    int itemToDelete;
+    printf("Please enter the item to be deleted: ");
+    scanf("%d", &itemToDelete);
+
+    struct Node* temp = *head_ref, *prev = NULL;
+    while (temp != NULL && temp->data != itemToDelete) {
+        prev = temp;
+        temp = temp->next;
+    }
+
+    if (temp == NULL) {
+        printf("The list contains no such element\n");
+        return;
+    }
+
+    if (prev == NULL) {
+        *head_ref = temp->next;
+    } else {
+        prev->next = temp->next;
+    }
+
+    printf("The element '%d' has been deleted\n", itemToDelete);
+    free(temp);
+}
+
+void displayList(struct Node* head) {
+    if (head == NULL) {
+        printf("The list is empty\n");
+        return;
+    }
+
+    printf("List content:\n");
+    int position = 1;
+    while (head != NULL) {
+        printf("%d. %d\n", position++, head->data);
+        head = head->next;
+    }
+}
+
+void deleteList(struct Node** head_ref) {
+    struct Node* current = *head_ref;
+    struct Node* next;
+
+    while (current != NULL) {
+        next = current->next;
+        free(current);
+        current = next;
+    }
+
+    *head_ref = NULL;
+    printf("The list has been emptied!\n");
+}
+
+int main() {
+    struct Node* head = NULL;
+
+    while (1) {
+        printf("\nList MENU\n");
+        printf("[1] Add Item\n");
+        printf("[2] Delete Item\n");
+        printf("[3] Display List\n");
+        printf("[4] Delete List\n");
+        printf("[0] Exit Program\n");
+        printf("Enter choice: ");
+
+        int choice;
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                addItem(&head);
+                break;
+            case 2:
+                deleteItem(&head);
+                break;
+            case 3:
+                displayList(head);
+                break;
+            case 4:
+                deleteList(&head);
+                break;
+            case 0:
+                printf("Exiting program. Goodbye!\n");
+                return 0;
+            default:
+                printf("Invalid choice. Please try again.\n");
+        }
+    }
+
+    return 0;
+}
